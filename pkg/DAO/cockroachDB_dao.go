@@ -6,11 +6,26 @@ import (
 	"fmt"
 	"time"
 
-	"proposal-template/model"
+	// "proposal-template/model"
 	"proposal-template/pkg/utils"
 
 	sq "github.com/Masterminds/squirrel"
 )
+
+type Paging struct {
+	Page  int `json:"page"`
+	Limit int `json:"limit"`
+}
+
+func (p *Paging) Validate() {
+	if p.Page < 1 {
+		p.Page = 1
+	}
+	if p.Limit < 1 {
+		p.Limit = 10
+	}
+}
+
 
 type GenericDAO[T any] struct {
 	db *sql.DB
@@ -39,7 +54,7 @@ func (dao *GenericDAO[T]) GetByColumn(ctx context.Context, column string, value 
 	return &obj, nil
 }
 
-func (dao *GenericDAO[T]) List(ctx context.Context, paging *model.Paging, query string, args ...interface{}) ([]T, error) {
+func (dao *GenericDAO[T]) List(ctx context.Context, paging Paging, query string, args ...interface{}) ([]T, error) {
 	paging.Validate()
 
 	offset := (paging.Page - 1) * paging.Limit
