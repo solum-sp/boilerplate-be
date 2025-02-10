@@ -24,7 +24,7 @@ project-root/
 │       └── repositories
 │           ├── generic_repo.go
 │           ├── user_repo.go
-│           └── user_repo_test.go
+│           └── ...
 ├── docker-compose.yml
 ├── go.mod
 ├── go.sum
@@ -32,7 +32,8 @@ project-root/
 │   ├── User.go
 │   ├── base.go
 │   └── error.go
-├── pkg
+│   └──...
+├── pkg                                                              # Shared Utility & Common Packages like config, kafka, logger...
 │   ├── database
 │   │   ├── cockroachDB
 │   │   │   ├── cockroachDB.go
@@ -51,6 +52,8 @@ project-root/
 │   │   └── logger.go
 │   ├── redis
 │   │   └── redis.go
+│   └── ...
+│   │
 │   └── utils
 │       ├── config
 │       │   └── config.go
@@ -58,6 +61,7 @@ project-root/
 │       ├── http.go
 │       ├── retry.go
 │       └── structToMap.go
+│       └── ...
 └── presentation                                                    # API & External Communication Layer
     ├── enter.go
     └── http
