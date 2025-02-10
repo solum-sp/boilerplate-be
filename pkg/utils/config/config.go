@@ -32,6 +32,7 @@ func (c *ConfigManager) LoadAllConfig(envFolderPath string) error {
 	}
 	return nil
 }
+
 func loadEnv(envFolderPath string) error {
 	env := os.Getenv("APP_ENV")
 	envFileName := ""

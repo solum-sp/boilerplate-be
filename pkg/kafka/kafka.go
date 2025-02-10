@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"proposal-template/pkg/utils"
+	config "proposal-template/pkg/utils/config"
 	"os"
 	"time"
 
@@ -21,6 +22,7 @@ type kafkaPublisher struct {
 	serde    serde.Serializer
 	topic    string
 }
+
 
 var _ Publisher = (*kafkaPublisher)(nil)
 
@@ -159,16 +161,6 @@ const (
 	retryInterval = 1 * time.Second
 )
 
-type SchemaRegistryConfig struct {
-	URL string `env:"KAFKA_SCHEMA_REGISTRY_URL,required"`
-}
-
-var _ utils.Config = (*SchemaRegistryConfig)(nil)
-
-func (c *SchemaRegistryConfig) Load() error {
-	log.Printf("Loading SchemaRegistryConfig")
-	return utils.ParseConfig(c)
-}
 
 type SchemaRegistry struct {
 	client schemaregistry.Client
@@ -269,24 +261,20 @@ func CreateTopicIfNotExist(adminClient *kafka.AdminClient, topicName string, num
 
 // endregion:       ======= schema registry =======
 // region:          ======= kafka utils =======
-type KafkaProducerConfig struct {
-	// Kafka broker servers. Example :  "localhost:9092,localhost:9093"
-	Brokers string `env:"KAFKA_BROKERS,required"`
-	// An id string to pass to the server when making requests. The purpose of this is to be able to track the source of requests beyond just ip/port by allowing a logical application name to be included in server-side request logging.
-	ClientID string `env:"KAFKA_CLIENT_ID" envDefault:""`
-}
+// type KafkaProducerConfig struct {
+// 	// Kafka broker servers. Example :  "localhost:9092,localhost:9093"
+// 	Brokers string `env:"KAFKA_BROKERS,required"`
+// 	// An id string to pass to the server when making requests. The purpose of this is to be able to track the source of requests beyond just ip/port by allowing a logical application name to be included in server-side request logging.
+// 	ClientID string `env:"KAFKA_CLIENT_ID" envDefault:""`
+// }
 
 // KAFKA_BROKERS=localhost:9092
 // KAFKA_TOPIC=default
 // KAFKA_CONSUMER_GROUP_ID=mygroup
 // KAFKA_SCHEMA_REGISTRY_URL=http://localhost:8081
 
-var _ utils.Config = (*KafkaProducerConfig)(nil)
+var _ config.Config = (*KafkaProducerConfig)(nil)
 
-func (c *KafkaProducerConfig) Load() error {
-	log.Printf("Loading KafkaProducerConfig")
-	return utils.ParseConfig(c)
-}
 
 func NewKafkaProducer(cfg KafkaProducerConfig) (*kafka.Producer, error) {
 	return kafka.NewProducer(&kafka.ConfigMap{
@@ -300,57 +288,78 @@ func NewAdminClientFromProducer(producer *kafka.Producer) (*kafka.AdminClient, e
 	return kafka.NewAdminClientFromProducer(producer)
 }
 
-type KafkaConsumerConfig struct {
-	// Kafka broker servers. Example :  "localhost:9092,localhost:9093"
-	Brokers string `env:"KAFKA_BROKERS,required"`
-	// Consumer group id
-	GroupID string `env:"KAFKA_CONSUMER_GROUP_ID" envDefault:""`
+// type KafkaConsumerConfig struct {
+// 	// Kafka broker servers. Example :  "localhost:9092,localhost:9093"
+// 	Brokers string `env:"KAFKA_BROKERS,required"`
+// 	// Consumer group id
+// 	GroupID string `env:"KAFKA_CONSUMER_GROUP_ID" envDefault:""`
 
-	// Recommended settings for reliability and performance
+// 	// Recommended settings for reliability and performance
 
-	// Start reading from the earliest available offset
-	AutoOffsetReset string `env:"KAFKA_CONSUMER_AUTO_OFFSET_RESET" envDefault:"earliest"`
-	// Manually commit offsets for more control
-	EnableAutoCommit bool `env:"KAFKA_CONSUMER_ENABLE_AUTO_COMMIT" envDefault:"false"`
-	// 5 minutes max time between polls
-	MaxPollIntervalMs int `env:"KAFKA_CONSUMER_MAX_POLL_INTERVAL_MS" envDefault:"300000"`
-	// Detect consumer failures quickly
-	SessionTimeoutMs int `env:"KAFKA_CONSUMER_SESSION_TIMEOUT_MS" envDefault:"45000"`
-	// Frequent heartbeats
-	HeartbeatIntervalMs int `env:"KAFKA_CONSUMER_HEARTBEAT_INTERVAL_MS" envDefault:"3000"`
+// 	// Start reading from the earliest available offset
+// 	AutoOffsetReset string `env:"KAFKA_CONSUMER_AUTO_OFFSET_RESET" envDefault:"earliest"`
+// 	// Manually commit offsets for more control
+// 	EnableAutoCommit bool `env:"KAFKA_CONSUMER_ENABLE_AUTO_COMMIT" envDefault:"false"`
+// 	// 5 minutes max time between polls
+// 	MaxPollIntervalMs int `env:"KAFKA_CONSUMER_MAX_POLL_INTERVAL_MS" envDefault:"300000"`
+// 	// Detect consumer failures quickly
+// 	SessionTimeoutMs int `env:"KAFKA_CONSUMER_SESSION_TIMEOUT_MS" envDefault:"45000"`
+// 	// Frequent heartbeats
+// 	HeartbeatIntervalMs int `env:"KAFKA_CONSUMER_HEARTBEAT_INTERVAL_MS" envDefault:"3000"`
 
-	// Error handling and retry configurations
+// 	// Error handling and retry configurations
 
-	// Backoff between retries
-	RetryBackoffMs int `env:"KAFKA_CONSUMER_RETRY_BACKOFF_MS" envDefault:"100"`
+// 	// Backoff between retries
+// 	RetryBackoffMs int `env:"KAFKA_CONSUMER_RETRY_BACKOFF_MS" envDefault:"100"`
 
-	// Start consuming immediately
-	FetchMinBytes int `env:"KAFKA_CONSUMER_FETCH_MIN_BYTES" envDefault:"1"`
-	// Maximum wait time for fetch
-	FetchWaitMaxMs int `env:"KAFKA_CONSUMER_FETCH_WAIT_MAX_MS" envDefault:"500"`
+// 	// Start consuming immediately
+// 	FetchMinBytes int `env:"KAFKA_CONSUMER_FETCH_MIN_BYTES" envDefault:"1"`
+// 	// Maximum wait time for fetch
+// 	FetchWaitMaxMs int `env:"KAFKA_CONSUMER_FETCH_WAIT_MAX_MS" envDefault:"500"`
+// }
+
+var _ config.Config = (*KafkaConsumerConfig)(nil)
+
+/*
+USAGE EXAMPLE:
+- DEFAULT DECLARATION
+
+consumer, err := kafka.NewKafkaConsumer() 
+if err != nil {
+	log.Fatalf("Failed to create Kafka producer: %v", err)
 }
 
-var _ utils.Config = (*KafkaConsumerConfig)(nil)
+- CUSTOM DECLARATION:
 
-func (c *KafkaConsumerConfig) Load() error {
-	log.Printf("Loading KafkaConsumerConfig")
-	return utils.ParseConfig(c)
-}
+consumer, err := service.NewKafkaConsumer(
+	kafka.WithBrokers("custom-addr-of-broker"), //default addr == 'localhost:9092'
+	kafka.WithClientID("custom-client-id"),
+)
 
-func NewKafkaConsumer(cfg KafkaConsumerConfig) (*kafka.Consumer, error) {
+*/
+func NewKafkaConsumer(opts ...Option) (*kafka.Consumer, error) {
+	producerConfig := DefaultConfig.Producer
+	consumerConfig := DefaultConfig.Consumer
+	schemaConfig := DefaultConfig.Schema
+
+	// Apply functional options
+	for _, opt := range opts {
+		opt(&producerConfig, &consumerConfig, &schemaConfig)
+	}
+
 	c, err := utils.Retry(10, 1*time.Second, func() (*kafka.Consumer, error) {
 		return kafka.NewConsumer(&kafka.ConfigMap{
-			"bootstrap.servers":     cfg.Brokers,
-			"group.id":              cfg.GroupID,
-			"auto.offset.reset":     cfg.AutoOffsetReset,
-			"enable.auto.commit":    cfg.EnableAutoCommit,
-			"max.poll.interval.ms":  cfg.MaxPollIntervalMs,
-			"session.timeout.ms":    cfg.SessionTimeoutMs,
-			"heartbeat.interval.ms": cfg.HeartbeatIntervalMs,
-			"retry.backoff.ms":      cfg.RetryBackoffMs,
-			"fetch.min.bytes":       cfg.FetchMinBytes,
-			"fetch.wait.max.ms":     cfg.FetchWaitMaxMs,
-		})
+		"bootstrap.servers":     consumerConfig.Brokers,
+		"group.id":              consumerConfig.GroupID,
+		"auto.offset.reset":     consumerConfig.AutoOffsetReset,
+		"enable.auto.commit":    consumerConfig.EnableAutoCommit,
+		"max.poll.interval.ms":  consumerConfig.MaxPollIntervalMs,
+		"session.timeout.ms":    consumerConfig.SessionTimeoutMs,
+		"heartbeat.interval.ms": consumerConfig.HeartbeatIntervalMs,
+		"retry.backoff.ms":      consumerConfig.RetryBackoffMs,
+		"fetch.min.bytes":       consumerConfig.FetchMinBytes,
+		"fetch.wait.max.ms":     consumerConfig.FetchWaitMaxMs,
+	})
 	})
 	if err != nil {
 		log.Printf("Failed to create kafka consumer: %s", err)

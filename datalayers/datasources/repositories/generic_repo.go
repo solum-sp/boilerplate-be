@@ -1,4 +1,5 @@
-package dao
+package repositories
+
 
 import (
 	"context"
@@ -105,4 +106,5 @@ func (dao *GenericDAO[T]) Create(ctx context.Context, model T) (int, error) {
 	}
 	return id, nil
 }
+
 

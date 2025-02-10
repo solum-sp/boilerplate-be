@@ -32,7 +32,8 @@ type CompanyConsumer struct {
 func NewCompanyConsumer(subscriber kafka.Subscriber)*CompanyConsumer {
 	return &CompanyConsumer{}
 }
-func (c *CompanyConsumer) ConsumeMessages() {
-	c.subscriber.ConsumeMessages()
-}
+
+// func (c *CompanyConsumer) ConsumeMessages() {
+// 	c.subscriber.ConsumeMessages()
+// }
 
