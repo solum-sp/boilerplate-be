@@ -166,9 +166,18 @@ type SchemaRegistry struct {
 	client schemaregistry.Client
 }
 
-func NewSchemaRegistry(cfg SchemaRegistryConfig) (*SchemaRegistry, error) {
+func NewSchemaRegistry(opts ...Option) (*SchemaRegistry, error) {
+	
+	producerConfig := DefaultConfig.Producer
+	consumerConfig := DefaultConfig.Consumer
+	schemaConfig := DefaultConfig.Schema
+
+	// Apply functional options
+	for _, opt := range opts {
+		opt(&producerConfig, &consumerConfig, &schemaConfig)
+	}
 	sr, err := utils.Retry(retryCount, retryInterval, func() (schemaregistry.Client, error) {
-		return schemaregistry.NewClient(schemaregistry.NewConfig(cfg.URL))
+		return schemaregistry.NewClient(schemaregistry.NewConfig(schemaConfig.URL))
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create schema registry client: %s", err)
@@ -273,13 +282,24 @@ func CreateTopicIfNotExist(adminClient *kafka.AdminClient, topicName string, num
 // KAFKA_CONSUMER_GROUP_ID=mygroup
 // KAFKA_SCHEMA_REGISTRY_URL=http://localhost:8081
 
-var _ config.Config = (*KafkaProducerConfig)(nil)
+var _ config.IConfig = (*KafkaProducerConfig)(nil)
 
 
-func NewKafkaProducer(cfg KafkaProducerConfig) (*kafka.Producer, error) {
+func NewKafkaProducer(opts ...Option) (*kafka.Producer, error) {
+	producerConfig := DefaultConfig.Producer
+	consumerConfig := DefaultConfig.Consumer
+	schemaConfig := DefaultConfig.Schema
+
+	// Apply functional options
+	for _, opt := range opts {
+		opt(&producerConfig, &consumerConfig, &schemaConfig)
+	}
 	return kafka.NewProducer(&kafka.ConfigMap{
-		"bootstrap.servers": cfg.Brokers,
-		"client.id":         cfg.ClientID,
+		// "bootstrap.servers": cfg.Brokers,
+		// "client.id":         cfg.ClientID,
+		"bootstrap.servers": producerConfig.Brokers,
+		"client.id":         producerConfig.ClientID,
+
 	})
 	// return p, nil
 }
@@ -288,37 +308,8 @@ func NewAdminClientFromProducer(producer *kafka.Producer) (*kafka.AdminClient, e
 	return kafka.NewAdminClientFromProducer(producer)
 }
 
-// type KafkaConsumerConfig struct {
-// 	// Kafka broker servers. Example :  "localhost:9092,localhost:9093"
-// 	Brokers string `env:"KAFKA_BROKERS,required"`
-// 	// Consumer group id
-// 	GroupID string `env:"KAFKA_CONSUMER_GROUP_ID" envDefault:""`
 
-// 	// Recommended settings for reliability and performance
-
-// 	// Start reading from the earliest available offset
-// 	AutoOffsetReset string `env:"KAFKA_CONSUMER_AUTO_OFFSET_RESET" envDefault:"earliest"`
-// 	// Manually commit offsets for more control
-// 	EnableAutoCommit bool `env:"KAFKA_CONSUMER_ENABLE_AUTO_COMMIT" envDefault:"false"`
-// 	// 5 minutes max time between polls
-// 	MaxPollIntervalMs int `env:"KAFKA_CONSUMER_MAX_POLL_INTERVAL_MS" envDefault:"300000"`
-// 	// Detect consumer failures quickly
-// 	SessionTimeoutMs int `env:"KAFKA_CONSUMER_SESSION_TIMEOUT_MS" envDefault:"45000"`
-// 	// Frequent heartbeats
-// 	HeartbeatIntervalMs int `env:"KAFKA_CONSUMER_HEARTBEAT_INTERVAL_MS" envDefault:"3000"`
-
-// 	// Error handling and retry configurations
-
-// 	// Backoff between retries
-// 	RetryBackoffMs int `env:"KAFKA_CONSUMER_RETRY_BACKOFF_MS" envDefault:"100"`
-
-// 	// Start consuming immediately
-// 	FetchMinBytes int `env:"KAFKA_CONSUMER_FETCH_MIN_BYTES" envDefault:"1"`
-// 	// Maximum wait time for fetch
-// 	FetchWaitMaxMs int `env:"KAFKA_CONSUMER_FETCH_WAIT_MAX_MS" envDefault:"500"`
-// }
-
-var _ config.Config = (*KafkaConsumerConfig)(nil)
+var _ config.IConfig = (*KafkaConsumerConfig)(nil)
 
 /*
 USAGE EXAMPLE:

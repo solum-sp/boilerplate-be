@@ -8,13 +8,14 @@ project-root/
 ├── Makefile                        
 ├── README.md
 ├── biz
-├── cmd                                                         # Application entry points
+├── cmd                                            # Application entry points
 │   ├── adapters
 │   │   ├── database.go
 │   │   ├── logger.go
 │   │   └── server.go
 │   └── main.go
-├── datalayers                                                  #  Data Access & External Data Integration Layer
+│
+├── datalayers                                     #  Data Access & External Data Integration Layer
 │   ├── cache
 │   │   └── example.go
 │   └── datasources
@@ -25,6 +26,7 @@ project-root/
 │           ├── generic_repo.go
 │           ├── user_repo.go
 │           └── ...
+│
 ├── docker-compose.yml
 ├── go.mod
 ├── go.sum
@@ -33,7 +35,8 @@ project-root/
 │   ├── base.go
 │   └── error.go
 │   └──...
-├── pkg                                                              # Shared Utility & Common Packages like config, kafka, logger...
+│
+├── pkg                                            # Shared Utility & Common Packages like config, kafka, logger...
 │   ├── database
 │   │   ├── cockroachDB
 │   │   │   ├── cockroachDB.go
@@ -42,14 +45,18 @@ project-root/
 │   │   │   │   └── 00001_create_user_table.sql
 │   │   │   └── options.go
 │   │   └── mongoDB
+│   │   └──...
+│   │   
 │   ├── kafka
 │   │   ├── event.go
 │   │   ├── kafka.go
 │   │   └── options.go
+│   │
 │   ├── logger
 │   │   ├── internal
 │   │   │   └── zaplogger.go
 │   │   └── logger.go
+│   │
 │   ├── redis
 │   │   └── redis.go
 │   └── ...
@@ -62,7 +69,8 @@ project-root/
 │       ├── retry.go
 │       └── structToMap.go
 │       └── ...
-└── presentation                                                    # API & External Communication Layer
+│
+└── presentation                                     # API & External Communication Layer
     ├── enter.go
     └── http
         └── server.go
@@ -85,6 +93,7 @@ This folder contains the main entry points of the application. It is responsible
 * Ensuring graceful shutdown and cleanup mechanisms for all running services.
 
 2. **`presentation/` -  API & External Communication Layer**
+
 This directory is responsible for exposing application functionalities to external systems. It acts as a gateway for external service or frontend applications to interact with the system, including:
 * HTTP API endpoints (e.g., RESTful APIs using Gin or Echo).
 
@@ -136,7 +145,7 @@ This layer is responsible for all interactions with data sources and external de
 
 * Batch processing and scheduled jobs to fetch or synchronize data periodically from external sources.
 
-The `datalayers/` abstracts data retrieval and storage, ensuring that biz/ logic remains independent of specific storage implementations. This separation allows for easier testing and swapping of data providers without affecting business logic.
+The `datalayers/` abstracts data retrieval and storage, ensuring that `biz/` logic remains independent of specific storage implementations. This separation allows for easier testing and swapping of data providers without affecting business logic.
 
 5. **`pkg/` - Shared Utility & Common Packages**
 
@@ -165,7 +174,7 @@ flowchart TD;
 ``` 
 
 ### 1. Request flow (HTTP/gRPC Call Example):
-1. `cmd/` initializes the app, sets up dependencies, and starts the HTTP server.
+1. `cmd/` initializes the app, sets up dependencies, and starts this service.
 
 2. `presentation/` receives the request, validates input, and routes it to the appropriate business logic.
 

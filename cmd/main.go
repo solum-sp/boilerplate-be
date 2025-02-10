@@ -8,8 +8,11 @@ import (
 
 func init() {
 	fmt.Println("Initializing IoC container...") // Debugging
+	adapters.IoCConfig()
 	adapters.IoCLogger()
 	adapters.IoCDatabase()
+	adapters.IoCRepositories()
+	adapters.IoCBiz()
 	adapters.IoCServer()
 	fmt.Println("IoC container initialized.") 
 }

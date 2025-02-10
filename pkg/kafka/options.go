@@ -11,7 +11,7 @@ type KafkaProducerConfig struct {
 	ClientID string `env:"KAFKA_CLIENT_ID" envDefault:"default-client"`
 }
 
-var _ utils.Config = (*KafkaProducerConfig)(nil)
+var _ utils.IConfig = (*KafkaProducerConfig)(nil)
 
 func (c *KafkaProducerConfig) Load() error {
 	log.Printf("Loading KafkaProducerConfig")
@@ -32,7 +32,7 @@ type KafkaConsumerConfig struct {
 	FetchWaitMaxMs     int    `env:"KAFKA_CONSUMER_FETCH_WAIT_MAX_MS" envDefault:"500"`
 }
 
-var _ utils.Config = (*KafkaConsumerConfig)(nil)
+var _ utils.IConfig = (*KafkaConsumerConfig)(nil)
 
 func (c *KafkaConsumerConfig) Load() error {
 	log.Printf("Loading KafkaConsumerConfig")
@@ -44,7 +44,7 @@ type SchemaRegistryConfig struct {
 	URL string `env:"KAFKA_SCHEMA_REGISTRY_URL,required"`
 }
 
-var _ utils.Config = (*SchemaRegistryConfig)(nil)
+var _ utils.IConfig = (*SchemaRegistryConfig)(nil)
 
 func (c *SchemaRegistryConfig) Load() error {
 	log.Printf("Loading SchemaRegistryConfig")
@@ -114,5 +114,53 @@ func WithSchemaRegistryURL(url string) Option {
 func WithAutoOffsetReset(offset string) Option {
 	return func(_ *KafkaProducerConfig, c *KafkaConsumerConfig, _ *SchemaRegistryConfig) {
 		c.AutoOffsetReset = offset
+	}
+}
+
+func WithEnableAutoCommit(enable bool) Option {
+	return func(_ *KafkaProducerConfig, c *KafkaConsumerConfig, _ *SchemaRegistryConfig) {
+		c.EnableAutoCommit = enable
+	}
+}
+
+// WithMaxPollIntervalMs sets the max poll interval
+func WithMaxPollIntervalMs(ms int) Option {
+	return func(_ *KafkaProducerConfig, c *KafkaConsumerConfig, _ *SchemaRegistryConfig) {
+		c.MaxPollIntervalMs = ms
+	}
+}
+
+// WithSessionTimeoutMs sets the session timeout
+func WithSessionTimeoutMs(ms int) Option {
+	return func(_ *KafkaProducerConfig, c *KafkaConsumerConfig, _ *SchemaRegistryConfig) {
+		c.SessionTimeoutMs = ms
+	}
+}
+
+// WithHeartbeatIntervalMs sets the heartbeat interval
+func WithHeartbeatIntervalMs(ms int) Option {
+	return func(_ *KafkaProducerConfig, c *KafkaConsumerConfig, _ *SchemaRegistryConfig) {
+		c.HeartbeatIntervalMs = ms
+	}
+}
+
+// WithRetryBackoffMs sets the retry backoff time
+func WithRetryBackoffMs(ms int) Option {
+	return func(_ *KafkaProducerConfig, c *KafkaConsumerConfig, _ *SchemaRegistryConfig) {
+		c.RetryBackoffMs = ms
+	}
+}
+
+// WithFetchMinBytes sets the fetch minimum bytes
+func WithFetchMinBytes(bytes int) Option {
+	return func(_ *KafkaProducerConfig, c *KafkaConsumerConfig, _ *SchemaRegistryConfig) {
+		c.FetchMinBytes = bytes
+	}
+}
+
+// WithFetchWaitMaxMs sets the fetch wait max time
+func WithFetchWaitMaxMs(ms int) Option {
+	return func(_ *KafkaProducerConfig, c *KafkaConsumerConfig, _ *SchemaRegistryConfig) {
+		c.FetchWaitMaxMs = ms
 	}
 }

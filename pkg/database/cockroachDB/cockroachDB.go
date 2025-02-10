@@ -25,14 +25,12 @@ var DefaultConfig = CockroachDBConfig{
 	ConnMaxLifetimeInSecs: 300,
 }
 
-var _ config.Config = (*CockroachDBConfig)(nil)
+var _ config.IConfig = (*CockroachDBConfig)(nil)
 
 func (c *CockroachDBConfig) Load() error {
 	log.Printf("Loading CockroachDBConfig")
 	return config.ParseConfig(c)
 }
-
-
 
 func NewCockroachDB(opts ...Option) (*gorm.DB, error) {
 	cfg := DefaultConfig

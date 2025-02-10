@@ -11,6 +11,7 @@ import (
 type server struct {
 	httpServer httpserver.HTTPServer
 	//grpcServer...
+	//...
 }
 
 func NewServer() *server {
@@ -27,6 +28,7 @@ func NewServer() *server {
 	}
 }
 
+// Run starts all the servers in a separate goroutine and waits for any one of them to return an error.
 func (s *server) Run() error {
 	var wg sync.WaitGroup
 
@@ -43,9 +45,14 @@ func (s *server) Run() error {
 		}
 	}()
 	
+	//== if there are more than a server running, we add a goroutine like below
 	// go func ()  {
 	// 	defer wg.Done()
-	// 	if
+	// 	if err := s.grpcServer.Start(); err != nil {
+	// 		errChan <- err
+	// 	} else {
+	// 		errChan <- nil
+	// 	}
 	// }
 
 	wg.Wait()

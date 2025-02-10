@@ -7,7 +7,7 @@ import (
 )
 
 type BaseModel struct {
-	UUID        uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:uuid_generate_v4()"`
+	Id        uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:uuid_generate_v4()"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

@@ -9,15 +9,15 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type Config interface {
+type IConfig interface {
 	Load() error
 }
 
 type ConfigManager struct {
-	cfgs []Config
+	cfgs []IConfig
 }
 
-func NewConfigManager(cfgs []Config) *ConfigManager {
+func NewConfigManager(cfgs []IConfig) *ConfigManager {
 	return &ConfigManager{
 		cfgs: cfgs,
 	}
@@ -55,6 +55,6 @@ func loadEnv(envFolderPath string) error {
 	return nil
 }
 
-func ParseConfig(c Config) error {
+func ParseConfig(c IConfig) error {
 	return env.Parse(c)
 }

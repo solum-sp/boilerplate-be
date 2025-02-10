@@ -1,8 +1,10 @@
 package repositories
 
 import (
-	"database/sql"
+
 	"proposal-template/models"
+
+	"gorm.io/gorm"
 )
 
 // Define the table name for Users
@@ -13,7 +15,7 @@ type UserRepo struct {
 }
 
 // NewUserRepo creates a new UserRepo instance
-func NewUserRepo(db *sql.DB) *UserRepo {
+func NewUserRepo(db *gorm.DB) *UserRepo {
 	return &UserRepo{
 		GenericDAO: NewGenericDAO[model.User](db, usersTableName), 
 	}
