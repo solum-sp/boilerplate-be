@@ -55,6 +55,12 @@ func (s *HTTPServer) SetupRouter() {
 	s.addRoute(nil, "GET", "/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "pong"})
 	})
+
+	v1 := s.router.Group("/api/v1")
+	{
+		
+		s.SetupUserRouter(v1)
+	}
 }
 
 func (s *HTTPServer) addRoute(group *gin.RouterGroup, method string, path string, handler gin.HandlerFunc) {
