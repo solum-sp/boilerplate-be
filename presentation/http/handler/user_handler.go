@@ -21,11 +21,11 @@ type Option func(*UserHandler)
 
 func NewUserHandler(opts ...Option) *UserHandler {
 
-	var UserService IUserService
-	container.Resolve(&UserService)
+	var userService IUserService
+	container.Resolve(&userService)
 
 	userHandler := &UserHandler{
-		UserService: UserService,
+		UserService: userService,
 	}
 
 	for _, opt := range opts {
@@ -46,6 +46,7 @@ func (u *UserHandler) GetUserById(ctx *gin.Context) {
 	ctx.JSON(200, gin.H{"data": data})
 }
 
+// === optional dependencies ===
 func WithLogger(logger logger.ILogger) Option {
 	return func(h *UserHandler) {
 		h.logger = logger

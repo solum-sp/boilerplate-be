@@ -22,7 +22,6 @@ func NewServer() *server {
 		panic(err)
 	}
 
-
 	return &server{
 		httpServer: *hs,
 	}
@@ -35,7 +34,9 @@ func (s *server) Run() error {
 
 	errChan := make(chan error, 1)
 
-	wg.Add(1) //If there are more than http server, this "1" value should be increased  
+	wg.Add(1) 
+	//If there are more than http server, this "1" value should be increased, for example
+	// if we added a grpc server, this value should be "2"
 	go func ()  {
 		defer wg.Done()
 		if err := s.httpServer.Start(); err != nil {
@@ -45,7 +46,8 @@ func (s *server) Run() error {
 		}
 	}()
 	
-	//== if there are more than a server running, we add a goroutine like below
+	//== if there are more than a server running, we add a goroutine like above
+	//== example
 	// go func ()  {
 	// 	defer wg.Done()
 	// 	if err := s.grpcServer.Start(); err != nil {

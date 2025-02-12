@@ -27,7 +27,7 @@ func IoCServer() {
 			httpserver.WithLogger(logger),
 			httpserver.WithConfig(appConfig.Httpserver),
 		)
-	
+		
 		// fmt.Println("HTTPServer successfully registered in IoC") ==> Debugging
 		return server
 	})

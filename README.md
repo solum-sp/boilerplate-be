@@ -193,3 +193,49 @@ flowchart TD;
 3. `presentation/` may publish new messages to a queue or update external systems asynchronously.
 
 4. `State is persisted in the database`, and an event notification can be sent to notify other microservices.
+
+
+```mermaid
+flowchart TD;
+
+    datalayer[Data Layer]
+    db[Database]
+    rest[Rest API]
+    igrpc[Incoming gRPC]
+    ebus1[Event Bus]
+
+    subgraph microservice[Micro service]
+        subgraph presentation [Presentation]
+            httprouter[presentation/http/router]
+            httphandler[presentation/http/handler]
+            grpcrouter[presentation/grpc/router]
+            grpchandler[presentation/grpc/handler]
+            publisher[presentation/event/publisher]
+        end
+        subgraph biz [Biz]
+            svc[biz/service]
+        end
+        subgraph datalayer [Data Layer]
+            repo[datalayer/repository]
+            consumer[datalayer/external/consumer]
+            cgrpc[datalayer/external/grpc-client]
+            dataexternal[datalayer/external/]
+        end
+    end
+    style microservice fill:#f9f,stroke:#333,stroke-width:4px
+    rest --> httprouter --> httphandler
+    igrpc --> grpcrouter --> grpchandler
+    httphandler <--> svc 
+    grpchandler <--> svc 
+    publisher <--> svc 
+    svc <--> repo
+    svc <--> consumer
+    svc <--> dataexternal
+    svc <--> cgrpc
+    repo <--> db
+    ebus[Event Bus] 
+    consumer <--> ebus
+    dataexternal <--> externalAPI[External API]
+    ebus1  --> publisher
+    cgrpc --> egrpc[External gRPC]
+```

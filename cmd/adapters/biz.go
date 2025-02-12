@@ -10,7 +10,7 @@ import (
 )
 
 func IoCBiz() {
-	container.Singleton(func() handler.IUserService{
+	container.TransientLazy(func() handler.IUserService{
 		var (
 			logger  logger.ILogger
 			userRepo biz.IUserRepo
@@ -24,8 +24,9 @@ func IoCBiz() {
 		if err != nil {
 			panic(err)
 		}
-
+		
 		userService := biz.NewUserService(
+			userRepo,
 			biz.WithLogger(logger),
 		)
 		fmt.Println("UserService successfully registered in IoC")

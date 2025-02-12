@@ -5,7 +5,7 @@ import (
 	model "proposal-template/models"
 	"proposal-template/pkg/logger"
 
-	"github.com/golobby/container/v3"
+	// "github.com/golobby/container/v3"
 	"gorm.io/gorm"
 )
 
@@ -16,17 +16,15 @@ type IUserRepo interface {
 }
 
 type UserService struct {
-	IUserRepo
+	repo IUserRepo
 	logger logger.ILogger
 }
 
 type Option func (*UserService)
-func NewUserService(opts ...Option) *UserService {
-	var userRepo IUserRepo
-	container.Resolve(&userRepo)
+func NewUserService(repo IUserRepo, opts ...Option) *UserService {
 
 	userService := &UserService{
-		IUserRepo: userRepo,
+		repo: repo,
 	}
 
 	for _, opt := range opts {
@@ -36,7 +34,7 @@ func NewUserService(opts ...Option) *UserService {
 }
 
 func (s *UserService)  GetById(id string) (*model.User, error) {
-	return s.IUserRepo.GetByColumn(context.Background(), "id", id)
+	return s.repo.GetByColumn(context.Background(), "id", id)
 }
 
 func WithLogger(logger logger.ILogger) Option {
@@ -44,3 +42,4 @@ func WithLogger(logger logger.ILogger) Option {
 		h.logger = logger
 	}
 }
+
